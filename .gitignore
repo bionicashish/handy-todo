@@ -4,3 +4,5 @@
 HandyToDo.app
 HandyToDo.zip
 .DS_Store
+.claude/
+.vscode/
