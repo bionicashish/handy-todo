@@ -1,0 +1,6 @@
+.build/
+*.o
+*.d
+HandyToDo.app
+HandyToDo.zip
+.DS_Store
