@@ -63,7 +63,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Panel
 
     private func setupPanel() {
-        let hostingView = NSHostingView(rootView: ContentView(store: store))
+        let hostingView = NSHostingView(
+            rootView: ContentView(
+                store: store,
+                requestClose: { [weak self] in self?.closePanel() }
+            )
+        )
 
         // Clip all child views (including NSScrollView inside List) at the CALayer level
         hostingView.wantsLayer = true
@@ -115,6 +120,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let button = statusItem.button,
               let buttonWindow = button.window,
               let screen = buttonWindow.screen ?? NSScreen.main else { return }
+
+        removeEventMonitor()
 
         // Position panel below the status item button
         let buttonFrameOnScreen = buttonWindow.convertToScreen(

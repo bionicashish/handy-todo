@@ -123,8 +123,8 @@ private struct TodoTextView: NSViewRepresentable {
     }
 
     func updateNSView(_ sv: NSScrollView, context: Context) {
-        applyContent(to: context.coordinator.textView)
         context.coordinator.parent = self
+        applyContent(to: context.coordinator.textView)
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, nsView sv: NSScrollView, context: Context) -> CGSize? {
@@ -174,6 +174,7 @@ private struct TodoTextView: NSViewRepresentable {
 
         func textDidEndEditing(_ n: Notification) {
             parent.isEditing = false
+            parent.onCommit()
         }
 
         func textDidChange(_ n: Notification) {
@@ -184,7 +185,6 @@ private struct TodoTextView: NSViewRepresentable {
         func textView(_ tv: NSTextView, doCommandBy selector: Selector) -> Bool {
             if selector == #selector(NSResponder.insertNewline(_:)) {
                 tv.window?.makeFirstResponder(nil)  // resign focus → textDidEndEditing
-                parent.onCommit()
                 return true
             }
             return false
@@ -197,8 +197,9 @@ private struct TodoTextView: NSViewRepresentable {
 private struct EditableItemRow: View {
     @Binding var item: ChecklistItem
     @State private var isEditing = false
+    @State private var draftTitle = ""
+    @State private var committedTitle = ""
 
-    private let ink = Color(hex: "1b1b1b")
     private var nsFont: NSFont {
         let key = NSFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
         let vars: [NSNumber: NSNumber] = [
@@ -210,23 +211,40 @@ private struct EditableItemRow: View {
         return NSFont(descriptor: desc, size: 14) ?? .systemFont(ofSize: 14)
     }
 
+    private func commitDraft() {
+        let trimmed = draftTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        draftTitle = trimmed.isEmpty ? committedTitle : trimmed
+        item.title = draftTitle
+        committedTitle = draftTitle
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             HandyCheckbox(isOn: $item.isCompleted)
                 .padding(.vertical, 3)
 
             TodoTextView(
-                text: $item.title,
+                text: $draftTitle,
                 isCompleted: item.isCompleted,
                 isEditing: $isEditing,
                 nsFont: nsFont,
-                onCommit: { isEditing = false }
+                onCommit: commitDraft
             )
             .padding(.vertical, 2)
             .frame(maxWidth: .infinity)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
+        .onAppear {
+            draftTitle = item.title
+            committedTitle = item.title
+        }
+        .onChange(of: item.title) { _, newValue in
+            if !isEditing {
+                draftTitle = newValue
+                committedTitle = newValue
+            }
+        }
     }
 }
 
@@ -290,6 +308,7 @@ private struct GhostInputRow: View {
 
 struct ContentView: View {
     @State var store: ChecklistStore
+    var requestClose: () -> Void
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -322,7 +341,7 @@ struct ContentView: View {
         .frame(width: 400, height: 520)
         .background(Color.white)
         .onKeyPress(.escape) {
-            NSApp.keyWindow?.orderOut(nil)
+            requestClose()
             return .handled
         }
     }
