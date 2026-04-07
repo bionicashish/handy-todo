@@ -226,6 +226,7 @@ private struct EditableItemRow: View {
             .frame(maxWidth: .infinity)
         }
         .frame(maxWidth: .infinity)
+        .padding(.vertical, 6)
     }
 }
 
@@ -259,7 +260,7 @@ private struct GhostInputRow: View {
                 axis: .vertical
             )
             .font(.googleSansFlex(size: 14))
-            .foregroundStyle(Color(hex: "A4A4A4"))
+            .foregroundStyle(text.isEmpty ? Color(hex: "A4A4A4") : ink)
             .textFieldStyle(.plain)
             .padding(.vertical, 2)
             .focused($focused)
@@ -293,7 +294,7 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 8) {
+                VStack(spacing: 0) {
                     ForEach($store.items) { $item in
                         EditableItemRow(item: $item)
                     }
