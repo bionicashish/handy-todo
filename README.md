@@ -27,6 +27,15 @@ chmod +x build.sh
 open HandyToDo.app
 ```
 
+## Build DMG
+
+```bash
+chmod +x build-dmg.sh
+./build-dmg.sh
+```
+
+This creates `HandyToDo.dmg` in the repository root, ready to upload to a GitHub Release.
+
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
