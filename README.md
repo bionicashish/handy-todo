@@ -34,24 +34,8 @@ chmod +x build-dmg.sh
 ./build-dmg.sh
 ```
 
-This creates `HandyToDo.dmg` in the repository root, ready to upload to a GitHub Release.
-If you do that, make sure you follow the signing and notarization steps below first.
+This creates `HandyToDo.dmg` in the repository root.
 
-## Distributable macOS Release
-
-If you plan to share the app over the internet, you must sign and notarize it. A plain local build can open on the build machine, but a downloaded copy may show:
-
-`"HandyToDo.app" is damaged and can't be opened. You should move it to the Trash.`
-
-Use a Developer ID Application certificate plus a saved `notarytool` keychain profile:
-
-```bash
-export MAC_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
-export NOTARYTOOL_PROFILE="AC_PASSWORD_PROFILE"
-./build-dmg.sh
-```
-
-If `MAC_SIGN_IDENTITY` is not set, the scripts make a local-only build for testing and print a warning.
 
 ## Keyboard Shortcuts
 
